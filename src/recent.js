@@ -12,6 +12,13 @@ export function machineOf(address) {
   return slash < 0 ? null : address.slice(0, slash);
 }
 
+/** Machines whose Terminals can't be listed right now (still loading, or unavailable): their
+ *  Entries are kept but can't be picked. This computer (name null) is never one of them.
+ *  @param {{ name: string | null, layout: string }[]} machines @returns {Set<string>} */
+export function unreachableMachines(machines) {
+  return new Set(machines.filter((m) => m.name !== null && m.layout !== "ready").map((m) => m.name));
+}
+
 /** @param {{ space: string, tab: string, pane: string | null, terminal: string | null } | null} focused
  *  @param {number} now @returns {Entry | null} */
 export function placeOf(focused, now) {

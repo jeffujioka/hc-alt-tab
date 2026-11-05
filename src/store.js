@@ -1,10 +1,10 @@
 // Reads and writes the stored Recent list through Herdr. All decisions live in ./recent.js.
 import { shared, setShared, terminals, machines } from "herdr";
-import { SHARED_KEY, prune, recordVisit } from "./recent.js";
+import { SHARED_KEY, prune, recordVisit, unreachableMachines } from "./recent.js";
 
-/** Machines whose layout can't be reached right now. @returns {Set<string>} */
+/** Machines whose Terminals can't be listed right now (loading or unavailable). @returns {Set<string>} */
 export function offlineMachines() {
-  return new Set(machines().filter((m) => m.name !== null && m.layout === "unavailable").map((m) => m.name));
+  return unreachableMachines(machines());
 }
 
 /** @returns {import("./recent.js").Entry[]} */

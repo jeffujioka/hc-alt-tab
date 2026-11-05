@@ -1,5 +1,5 @@
 import { describe, test, expect } from "bun:test";
-import { machineOf, placeOf, recordVisit, prune, previousPlace, isSelectable, MAX_ENTRIES } from "../src/recent.js";
+import { machineOf, placeOf, recordVisit, prune, previousPlace, isSelectable, unreachableMachines, MAX_ENTRIES } from "../src/recent.js";
 
 const e = (terminal, at = 0) => ({ terminal, space: "s", tab: "t", pane: null, at });
 const terms = (list) => list.map((x) => x.terminal);
@@ -67,5 +67,21 @@ describe("isSelectable", () => {
   test("offline Machine Entries are not selectable", () => {
     expect(isSelectable(e("bs/t2"), new Set(["bs"]))).toBe(false);
     expect(isSelectable(e("t2"), new Set(["bs"]))).toBe(true);
+  });
+});
+
+describe("unreachableMachines", () => {
+  test("a Machine still loading or unavailable is unreachable; ready and this computer are not", () => {
+    const out = unreachableMachines([
+      { name: null, layout: "loading" },
+      { name: "bs", layout: "loading" },
+      { name: "jeff-remote", layout: "unavailable" },
+      { name: "vps", layout: "ready" },
+    ]);
+    expect([...out].sort()).toEqual(["bs", "jeff-remote"]);
+  });
+  test("a loading Machine's Entries survive pruning", () => {
+    const off = unreachableMachines([{ name: "bs", layout: "loading" }]);
+    expect(prune([e("bs/t1")], new Set(), off).map((x) => x.terminal)).toEqual(["bs/t1"]);
   });
 });
