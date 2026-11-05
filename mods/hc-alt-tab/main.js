@@ -3,9 +3,9 @@
 // section mod:hc-alt-tab); releasing Cmd switches, Esc cancels, Enter or a click also switches.
 import { View, div, image, svg } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
-import { agents, closeOverlay, focused, nextCommand, panes, props, run, spaces, terminals, theme } from "herdr";
-import { initialSelection, isSelectable, machineOf, placeOf, stepSelection } from "./recent.js";
-import { offlineMachines, readList, writeVisit } from "./store.js";
+import { closeOverlay, focused, nextCommand, props, run, theme } from "herdr";
+import { initialSelection, isSelectable, placeOf, stepSelection } from "./recent.js";
+import { describePlace, offlineMachines, readList, writeVisit } from "./store.js";
 
 function icon(p, size, color) {
   if (!p?.icon) return null;
@@ -48,29 +48,10 @@ export default class Switcher extends View {
     this.close();
   }
 
-  // What a row shows, looked up live so renamed spaces and tabs read right.
-  describe(entry) {
-    const term = terminals().find((x) => x.address === entry.terminal);
-    const pane = panes().find((p) => p.terminal === entry.terminal);
-    const tabId = pane?.tab ?? entry.tab;
-    const space = spaces().find((s) => s.tabs.some((tb) => tb.id === tabId)) ?? spaces().find((s) => s.id === entry.space);
-    const tab = space?.tabs.find((tb) => tb.id === tabId);
-    const agent = agents().find((a) => a.address === entry.terminal);
-    const title = pane?.title || term?.name || term?.program?.name || entry.terminal;
-    // An unnamed tab is often called after its agent's title; don't print it twice.
-    const parts = [space?.name, tab?.name, title === tab?.name ? null : title];
-    return {
-      program: term?.program,
-      label: parts.filter(Boolean).join(" › "),
-      machine: machineOf(entry.terminal),
-      status: agent?.status ?? null,
-    };
-  }
-
   render() {
     const t = theme();
     const row = (entry, i) => {
-      const d = this.describe(entry);
+      const d = describePlace(entry);
       const selectable = isSelectable(entry, this.offline);
       return h_flex()
         .id(`hcat-${i}`)

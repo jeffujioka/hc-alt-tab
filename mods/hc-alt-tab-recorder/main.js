@@ -20,6 +20,8 @@ export default class Recorder extends View {
   init(_props, cx) {
     this.dwell = new Dwell();
     cx.timer.every(250, () => {
+      // Look at focus again first: a change since the last render must not count for the old place.
+      this.observeFocus();
       const visit = this.dwell.due(Date.now());
       if (visit) writeVisit(visit);
     });
@@ -34,9 +36,13 @@ export default class Recorder extends View {
     });
   }
 
-  render() {
+  observeFocus() {
     const now = Date.now();
     this.dwell.observe(placeOf(focused(), now), now);
+  }
+
+  render() {
+    this.observeFocus();
     return div();
   }
 }
