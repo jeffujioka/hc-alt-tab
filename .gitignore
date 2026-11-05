@@ -1,1 +1,4 @@
-spike/
+node_modules/
+mods/*/recent.js
+mods/*/dwell.js
+mods/*/store.js
