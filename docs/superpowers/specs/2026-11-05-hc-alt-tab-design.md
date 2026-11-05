@@ -63,7 +63,7 @@ As in `GLOSSARY.md`: Machine, Space, Tab, Pane, Terminal, Agent, Visit, Entry, R
 
 ### Recording Visits
 
-- A mod copy in a zero-size, hidden block records Visits. It lives in `main-alt-tab` (clone of `main`, becomes the daily layout), `my-layout`, `mission-control`, `mission-control-classic`. `terminals` and `win98` are not recorded.
+- A mod copy in a zero-size block records Visits. It lives in `main-alt-tab` (clone of `main`, becomes the daily layout) and every other layout that isn't Herdr's own (Herdr's own: the `layout:` entries in `installed.json`, i.e. `main`, `terminals`, `win98`, which are not recorded). *(PR review: originally a fixed list of this user's layouts.)*
 - A Visit is focus that stays on the same place for **1 second**. Focus that moves on sooner is not a Visit.
 - A switch made by the Switcher or Quick toggle is a Visit immediately, with no dwell, in any layout: the Switcher writes it to the stored list itself. *(Author's call.)*
 - Pressing `cmd-f4` or `cmd-f5` first records the current place as a Visit immediately, so a press within the dwell window still knows where you came from. *(Author's call.)*

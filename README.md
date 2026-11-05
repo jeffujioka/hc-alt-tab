@@ -22,7 +22,7 @@ On Mac keyboards where F-keys control brightness and volume, either turn on *Sys
 
 ## Install
 
-Needs [Bun](https://bun.sh) and the Herdr app running.
+Needs [Bun](https://bun.sh), `rsync`, and the Herdr app running with a `keys.json` in its folder (Herdr writes one once you change any shortcut; install refuses to create one, since a file holding only these bindings would replace Herdr's defaults).
 
 ```sh
 bun scripts/install.js
@@ -30,11 +30,11 @@ bun scripts/install.js
 
 This:
 - copies `mods/hc-alt-tab` (the Switcher) and `mods/hc-alt-tab-recorder` into `~/.config/herdr-app/mods/` (`HERDR_APP_HOME` overrides the folder);
-- clones Herdr's `main` layout as `main-alt-tab` and switches to it;
-- adds a zero-size recording block to `main-alt-tab`, `my-layout`, `mission-control` and `mission-control-classic` (whichever exist);
+- clones Herdr's `main` layout as `main-alt-tab` and **switches your window to it** (the layout you were on is remembered for uninstall);
+- adds a zero-size recording block to `main-alt-tab` and to every other layout that isn't Herdr's own (Herdr's own are the `layout:` entries in its `installed.json`: `main`, `terminals`, `win98`); a layout you add later gets the block when you run install again;
 - adds the key bindings to `keys.json`, leaving any key you already use for something else alone (it prints those).
 
-It backs up `keys.json` and the layouts it touches to `<file>.hc-alt-tab.bak` the first time, and is safe to run again.
+It backs up `keys.json` and the layouts it touches to `<file>.hc-alt-tab.bak` the first time, keeps each file's indentation style, and is safe to run again.
 
 ## Uninstall
 
@@ -43,7 +43,7 @@ bun scripts/uninstall.js          # keeps layouts/main-alt-tab.json
 bun scripts/uninstall.js --purge  # deletes it too
 ```
 
-Switches back to `main`, removes the bindings and recording blocks, and deletes both mods.
+Switches back to the layout you were on before the first install (`main` if that's gone), removes the bindings and the recording block from every layout, and deletes both mods. If Herdr can't switch, it says so and carries on.
 
 ## Limits
 

@@ -1,5 +1,5 @@
 import { describe, test, expect } from "bun:test";
-import { machineOf, placeOf, recordVisit, prune, previousPlace, isSelectable, unreachableMachines, MAX_ENTRIES } from "../src/recent.js";
+import { machineOf, placeOf, recordVisit, prune, previousPlace, isSelectable, unreachableMachines, sameTerminals, MAX_ENTRIES } from "../src/recent.js";
 
 const e = (terminal, at = 0) => ({ terminal, space: "s", tab: "t", pane: null, at });
 const terms = (list) => list.map((x) => x.terminal);
@@ -83,5 +83,18 @@ describe("unreachableMachines", () => {
   test("a loading Machine's Entries survive pruning", () => {
     const off = unreachableMachines([{ name: "bs", layout: "loading" }]);
     expect(prune([e("bs/t1")], new Set(), off).map((x) => x.terminal)).toEqual(["bs/t1"]);
+  });
+});
+
+describe("sameTerminals", () => {
+  test("same places in the same order are the same list, whatever their times", () => {
+    expect(sameTerminals([e("t1", 1), e("t2", 2)], [e("t1", 9), e("t2", 9)])).toBe(true);
+  });
+  test("a different order or length is a change", () => {
+    expect(sameTerminals([e("t1"), e("t2")], [e("t2"), e("t1")])).toBe(false);
+    expect(sameTerminals([e("t1")], [e("t1"), e("t2")])).toBe(false);
+  });
+  test("a changed label is a change", () => {
+    expect(sameTerminals([{ ...e("t1"), label: "a" }], [{ ...e("t1"), label: "b" }])).toBe(false);
   });
 });

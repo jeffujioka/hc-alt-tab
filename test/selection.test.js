@@ -14,6 +14,9 @@ describe("initialSelection", () => {
   test("skips an offline previous place", () => {
     expect(initialSelection([e("t1"), e("bs/t2"), e("t3")], "t1", new Set(["bs"]))).toBe(2);
   });
+  test("opens on a selectable row when neither a previous nor the current place can be picked", () => {
+    expect(initialSelection([e("bs/t1"), e("t2")], null, new Set(["bs"]))).toBe(1);
+  });
   test("is 0 for an empty list", () => {
     expect(initialSelection([], null, none)).toBe(0);
   });

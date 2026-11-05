@@ -1,5 +1,30 @@
 import { describe, test, expect } from "bun:test";
-import { BINDINGS, RECORDER_BLOCK, addBindings, removeBindings, addRecorderBlock, removeRecorderBlock } from "../src/install-lib.js";
+import { BINDINGS, RECORDER_BLOCK, addBindings, removeBindings, addRecorderBlock, removeRecorderBlock, shippedLayouts, recordedLayouts, formatJson } from "../src/install-lib.js";
+
+describe("which layouts record", () => {
+  const installed = { "layout:main": { json: "a" }, "layout:win98": { json: "b" }, agents: { "main.js": "c" } };
+  test("Herdr's shipped layouts are the installed manifest's layout: entries", () => {
+    expect([...shippedLayouts(installed)].sort()).toEqual(["main", "win98"]);
+  });
+  test("every layout except Herdr's shipped ones records, plus main-alt-tab", () => {
+    expect(recordedLayouts(["main", "win98", "my-layout", "board"], shippedLayouts(installed))).toEqual(["main-alt-tab", "my-layout", "board"]);
+  });
+  test("main-alt-tab is listed once when it already exists", () => {
+    expect(recordedLayouts(["main", "main-alt-tab"], shippedLayouts(installed))).toEqual(["main-alt-tab"]);
+  });
+});
+
+describe("formatJson keeps the file's style", () => {
+  test("4-space indented files stay 4-space", () => {
+    expect(formatJson({ a: 1 }, '{\n    "x": 0\n}\n')).toBe('{\n    "a": 1\n}\n');
+  });
+  test("tab-indented files stay tab-indented", () => {
+    expect(formatJson({ a: 1 }, '{\n\t"x": 0\n}')).toBe('{\n\t"a": 1\n}\n');
+  });
+  test("one-line files stay on one line", () => {
+    expect(formatJson({ a: 1 }, '{"x":0}')).toBe('{"a":1}\n');
+  });
+});
 
 describe("addBindings", () => {
   test("adds every binding and keeps the person's own", () => {

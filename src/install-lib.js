@@ -13,7 +13,29 @@ export const RECORDER_BLOCK = {
   content: { mod: "hc-alt-tab-recorder" },
 };
 
-export const RECORDED_LAYOUTS = ["main-alt-tab", "my-layout", "mission-control", "mission-control-classic"];
+export const DAILY_LAYOUT = "main-alt-tab";
+
+/** Herdr's own layouts, from its installed-files manifest (`installed.json`): `layout:<name>` keys.
+ *  They are replaced on every start, so they can't hold the recording block.
+ *  @param {Record<string, unknown>} installed @returns {Set<string>} */
+export function shippedLayouts(installed) {
+  return new Set(Object.keys(installed).filter((k) => k.startsWith("layout:")).map((k) => k.slice("layout:".length)));
+}
+
+/** Layouts that get the recording block: the daily clone first, then every layout that isn't Herdr's.
+ *  @param {string[]} names layout names found in layouts/ @param {Set<string>} shipped @returns {string[]} */
+export function recordedLayouts(names, shipped) {
+  return [DAILY_LAYOUT, ...names.filter((n) => n !== DAILY_LAYOUT && !shipped.has(n))];
+}
+
+/** Serializes `value` in the indentation style of `original` (the file's previous text).
+ *  @param {unknown} value @param {string} original @returns {string} */
+export function formatJson(value, original) {
+  const body = original.trim();
+  if (!body.includes("\n")) return JSON.stringify(value) + "\n";
+  const indent = /\n([ \t]+)\S/.exec(body)?.[1] ?? "  ";
+  return JSON.stringify(value, null, indent) + "\n";
+}
 
 /** @returns {{ keys: object, conflicts: string[] }} */
 export function addBindings(keys) {

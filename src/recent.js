@@ -1,7 +1,7 @@
 // The Recent list: which places count, their order, and which one is "previous".
 // Pure: no herdr imports, so it runs under `bun test` and inside both mods.
 
-/** @typedef {{ terminal: string, space: string, tab: string, pane: string | null, at: number }} Entry */
+/** @typedef {{ terminal: string, space: string, tab: string, pane: string | null, at: number, label?: string }} Entry */
 
 export const MAX_ENTRIES = 5;
 export const SHARED_KEY = "hc-alt-tab.recent";
@@ -31,6 +31,12 @@ export function recordVisit(list, entry) {
   return [entry, ...list.filter((x) => x.terminal !== entry.terminal)].slice(0, MAX_ENTRIES);
 }
 
+/** Whether two lists hold the same places, in the same order, with the same labels (times ignored).
+ *  @param {Entry[]} a @param {Entry[]} b */
+export function sameTerminals(a, b) {
+  return a.length === b.length && a.every((x, i) => x.terminal === b[i].terminal && x.label === b[i].label);
+}
+
 /** @param {Entry[]} list @param {Set<string>} live @param {Set<string>} offline @returns {Entry[]} */
 export function prune(list, live, offline) {
   return list.filter((x) => live.has(x.terminal) || offline.has(machineOf(x.terminal)));
@@ -46,12 +52,15 @@ export function previousPlace(list, currentTerminal, offline) {
   return list.find((x) => x.terminal !== currentTerminal && isSelectable(x, offline)) ?? null;
 }
 
-/** Row the Switcher opens on: the previous place, else the current place, else the first row.
+/** Row the Switcher opens on: the previous place, else the current place, else the first
+ *  selectable row, else the first row.
  *  @param {Entry[]} rows @param {string | null} currentTerminal @param {Set<string>} offline @returns {number} */
 export function initialSelection(rows, currentTerminal, offline) {
   const prev = previousPlace(rows, currentTerminal, offline);
   if (prev) return rows.indexOf(prev);
-  return Math.max(0, rows.findIndex((x) => x.terminal === currentTerminal));
+  const current = rows.findIndex((x) => x.terminal === currentTerminal);
+  if (current >= 0) return current;
+  return Math.max(0, rows.findIndex((x) => isSelectable(x, offline)));
 }
 
 /** Next (dir 1) or previous (dir -1) selectable row, wrapping; stays put when there is none.
