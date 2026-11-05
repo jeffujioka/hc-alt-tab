@@ -8,9 +8,9 @@ for dir in mods/*/; do
   m=$(basename "$dir")
   dest="$HOME_DIR/mods/$m"
   mkdir -p "$dest"
-  rsync -a --delete --exclude recent.js --exclude dwell.js --exclude store.js "$dir" "$dest/"
+  rsync -a --delete --exclude recent.js --exclude dwell.js --exclude store.js --exclude jsconfig.json --exclude '*.d.ts' "$dir" "$dest/"
   for f in recent.js dwell.js store.js; do
-    [ -f "src/$f" ] && cp "src/$f" "$dest/$f"
+    if [ -f "src/$f" ]; then cp "src/$f" "$dest/$f"; fi
   done
   herdr-app check "$dest"
 done
