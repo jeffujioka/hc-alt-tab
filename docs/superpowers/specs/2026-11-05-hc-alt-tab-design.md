@@ -97,9 +97,9 @@ As in `GLOSSARY.md`: Machine, Space, Tab, Pane, Terminal, Agent, Visit, Entry, R
 
 ### Packaging
 
-- Project: `~/projects/jeffujioka/hc-alt-tab` (git), symlinked into `~/.config/herdr-app/mods/` as one mod named `hc-alt-tab`, or two mods if the recorder and the Switcher need different `mod.json` placement (builder's call).
+- Project: `~/projects/jeffujioka/hc-alt-tab` (git), copied (synced) into `~/.config/herdr-app/mods/`, since a symlinked mod does not hot-reload. One mod named `hc-alt-tab`, or two mods if the recorder and the Switcher need different `mod.json` placement (builder's call).
 - `keys.json` gains the `cmd-f4`, `cmd-shift-f4`, `cmd-f5` bindings (and any `mod:<name>` section the Switcher needs); existing bindings stay untouched.
-- Layout changes: create `main-alt-tab` via `layout.clone` from `main`, then add the hidden block to it and to the user-owned layouts listed above; switch the daily layout to `main-alt-tab`.
+- Layout changes: create `main-alt-tab` via `layout.clone` from `main`, then add the zero-size recording block (`"size": {"px": 0}`, not `"hidden"`) to it and to the user-owned layouts listed above; switch the daily layout to `main-alt-tab`.
 - Install/uninstall must be reversible: document the exact `keys.json` and layout edits so they can be undone.
 
 ## Validation first (gate before building the rest)
@@ -120,10 +120,21 @@ Outcomes:
 
 Upstream issue (app-level background mods or a focus-history API): only after validation, drafted for the user's approval, never posted without it.
 
+### Results (spike run 2026-11-05, throwaway mod, config restored afterwards)
+
+All four checks passed; the project is viable.
+
+| # | Check | Result |
+|---|---|---|
+| 1 | Hot reload through a symlink | **Fails**: edits through a symlinked mod folder are not picked up. A real copy reloads on save. Use a copy/sync step (`rsync` into `~/.config/herdr-app/mods/`). |
+| 2 | Cross-Space, cross-Machine switching | **Passes**: `herdr-app do pane.focus {terminal}` alone brought forward Space, an inactive Tab and the Pane, for local (`t1b`, `t5`) and remote (`bs/t19`) Terminals. |
+| 3 | Recorder residency | **Passes with a change**: a block with `"hidden": true` never starts (a copy starts the first time it shows). A visible block with `"size": {"px": 0}` starts at layout switch and its `render()` sees every focus change, local and remote; nothing showed on screen. Use the zero-size visible block, not `hidden`. |
+| 4 | Hold-to-cycle | **Passes**: the dialog overlay takes keyboard focus. A `mod:<name>` section in `keys.json` routes the repeated `cmd-f4` / `cmd-shift-f4` to the overlay's `nextCommand()` (without it the global `mod.open` toggles the overlay closed). `on_modifiers_changed` reports `platform: false` on Cmd release. Commands reached only the overlay copy, not the layout copy of the same mod. Keys were synthesized with System Events; a hands-on check with real keys remains. |
+
 ## Left to the builder
 
 - Whether the recorder and the Switcher are one mod or two, and how the global key reaches the right copy.
 - How the dwell timer is implemented: `cx.timer` is allowed for the dwell check and, if needed, the ~250 ms focus poll, but must not call `cx.notify()` / redraw unless the mod's own view changes.
 - Exact visual sizing and spacing of the dialog within the stated row contents.
 - The `shared()` key name and stored shape.
-- How the hidden block is made zero-size and non-focusable in each layout's JSON.
+- The exact JSON of the zero-size recording block in each layout (it must not be `hidden`, see Results).
