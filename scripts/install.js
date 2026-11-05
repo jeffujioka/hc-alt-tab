@@ -37,6 +37,10 @@ const keysPath = join(home, "keys.json");
 backup(keysPath);
 const { keys, conflicts } = addBindings(readJson(keysPath));
 writeJson(keysPath, keys);
+// Herdr ignores a `mod:<name>` keys section for a mod it hasn't loaded yet and keeps ignoring it
+// until keys.json is read again. Give the app time to pick up the freshly copied mods, then re-save.
+Bun.sleepSync(1500);
+writeJson(keysPath, keys);
 for (const c of conflicts) console.log(`not bound, already taken: ${c}`);
 
 sh("herdr-app", ["do", "layout.switch", JSON.stringify({ name: "main-alt-tab" })]);
