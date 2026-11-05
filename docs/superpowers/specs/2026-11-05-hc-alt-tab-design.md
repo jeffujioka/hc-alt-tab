@@ -67,7 +67,7 @@ As in `GLOSSARY.md`: Machine, Space, Tab, Pane, Terminal, Agent, Visit, Entry, R
 - A Visit is focus that stays on the same place for **1 second**. Focus that moves on sooner is not a Visit.
 - A switch made by the Switcher or Quick toggle is a Visit immediately, with no dwell, in any layout: the Switcher writes it to the stored list itself. *(Author's call.)*
 - Pressing `cmd-f4` or `cmd-f5` first records the current place as a Visit immediately, so a press within the dwell window still knows where you came from. *(Author's call.)*
-- An Entry is keyed by the focused Terminal address (`t13`, `bs/t13`); when no Terminal is focused, the Pane id. Mod panes (no Terminal) are not Entries.
+- An Entry is keyed by the focused Terminal address (`t13`, `bs/t13`). Places without a Terminal (mod panes, nothing focused) are not Entries. *(Plan review: the Pane-id fallback was dropped; every non-mod Pane has a Terminal, so it could never apply.)*
 - The Recent list holds the **5** most recent Entries, newest first, all Machines together, stored via `shared()` so it survives restarts and layout switches.
 - An Entry whose Terminal has ended or whose Pane has closed drops out; the list may then hold fewer than 5 until new Visits fill it.
 - An Entry on a Machine whose layout is unavailable (offline) stays in the list.
